@@ -1,0 +1,74 @@
+var margin = {top : 30, left : 30, right : 0, bottom : 50};
+
+var height = 500 - margin.top - margin.bottom;
+var yScale = d3.scale.linear();
+yScale.range([0, height * .9]);
+
+var width = 1100 - margin.left - margin.right;
+var xScale = d3.scale.linear();
+xScale.range([0, width ]);
+
+var D;
+var dataArray;
+var i = 0;
+var year;
+	
+d3.json("static/data/sub.json", function (data) {
+	D = data;
+	dataArray = data[i]['obtained_marks_list'];
+//	dataArray = [1,2,3,4,5];	// for DEBUG
+	xScale.domain([0, dataArray.length]);
+	yScale.domain([0, d3.max(dataArray)]);
+	draw();
+})
+
+var go = function() {
+	i++;
+	dataArray = D[i]['obtained_marks_list'];
+	xScale.domain([0, dataArray.length]);
+	yScale.domain([0, d3.max(dataArray)]);
+	d3.select("svg")
+				.remove();
+	//d3.selectAll("rect")
+		//		.remove();
+	draw();
+}
+
+var draw = function() {
+	var xAxis = d3.svg.axis()
+				.scale(xScale)
+				.orient("bottom");
+
+	var svg = d3.select("#graphContainer")
+				.append("svg")
+				.attr("width", width + margin.left) 
+				.attr("height", height ); // a little extra is always welcomed
+
+	svg.append("g")
+		.attr("class", "axis")
+		.attr("transform", "translate(" + (margin.left/5) + ", " + (height - margin.top) + ")")
+		.call(xAxis);
+
+	svg.selectAll("rect")
+		.data(dataArray)
+		.enter()
+		.append("rect")
+		.attr("x", function (d, i) {
+			return( margin.left/5 + i*( width / dataArray.length) );
+		})
+		.attr("width", function () {
+			return( width/(dataArray.length + 10) )
+		})
+		.attr("y", function (d, i) {
+			return( height - yScale(d) - margin.top)
+		})
+		.attr("height", function (d, i) {
+			return( yScale(d) );
+		})
+}
+
+function set_year(yr) {
+	year = yr;
+}
+
+
